@@ -19,7 +19,7 @@ class VoyagerListView extends StatelessWidget {
     List<dynamic> items,
     Identifier identifier,
     PathMapper pathMapper, {
-    Key key,
+    Key? key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.controller,
@@ -31,7 +31,7 @@ class VoyagerListView extends StatelessWidget {
     this.cacheExtent,
     this.semanticChildCount,
   })  : _idToIndex = <String, int>{},
-        _items = List<_VoyagerItem>(items.length),
+        _items = <_VoyagerItem>[],
         super(key: key) {
     final n = items.length;
     final duplicateCounter = <String, int>{};
@@ -43,25 +43,29 @@ class VoyagerListView extends StatelessWidget {
       final id = itemKeyId(_id, duplicateNumber: count);
       final path = pathMapper(item);
       _idToIndex[id] = index;
-      _items[index] = _VoyagerItem(
+      _items.insert(
+        index, 
+        _VoyagerItem(
           argument: VoyagerArgument(item),
           path: path,
-          key: ValueKey<String>(id));
+          key: ValueKey<String>(id)
+        ),
+      );
     }
   }
 
   final Map<String, int> _idToIndex;
   final List<_VoyagerItem> _items;
-  final ScrollController controller;
+  final ScrollController? controller;
   final Axis scrollDirection;
   final bool reverse;
-  final bool primary;
+  final bool? primary;
   final ScrollPhysics physics;
   final bool shrinkWrap;
-  final EdgeInsetsGeometry padding;
-  final double itemExtent;
-  final double cacheExtent;
-  final int semanticChildCount;
+  final EdgeInsetsGeometry? padding;
+  final double? itemExtent;
+  final double? cacheExtent;
+  final int? semanticChildCount;
 
   @override
   Widget build(BuildContext context) {
@@ -71,15 +75,14 @@ class VoyagerListView extends StatelessWidget {
       childrenDelegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
             final item = _items[index];
-            return VoyagerStatelessWidget(
+            return VoyagerWidget(
                 path: item.path,
-                useCache: true,
                 argument: item.argument,
                 key: item.key);
           },
           childCount: _items.length,
           findChildIndexCallback: (Key key) {
-            final ValueKey valueKey = key;
+            final ValueKey valueKey = key as ValueKey<dynamic>;
             final String id = valueKey.value;
             return _idToIndex[id];
           }),
@@ -99,7 +102,12 @@ class VoyagerListView extends StatelessWidget {
 }
 
 class _VoyagerItem {
-  const _VoyagerItem({this.argument, this.path, this.key});
+  const _VoyagerItem({
+    required this.argument, 
+    required this.path, 
+    required this.key
+  });
+
   final VoyagerArgument argument;
   final ValueKey key;
   final String path;
